@@ -37,3 +37,12 @@ button {
 button:hover {
   background-color: #2980b9;
 }
+
+ul {
+  padding-left: 15px;
+}
+
+li {
+  margin: 5px 0;
+  font-size: 14px;
+}
