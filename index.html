@@ -164,7 +164,7 @@
   <div class="container">
     <div class="intro-text">
       <h2>Estado del Laboratorio</h2>
-      <p>Controla el estado del laboratorio de forma rápida y sencilla. Regístrate o inicia sesión para comenzar.</p>
+      <p>Controla el estado del laboratorio de forma rápida y sencilla. Inicia sesión para comenzar.</p>
     </div>
     <div id="authSection" class="section visible card">
       <div id="loginForm">
@@ -174,20 +174,6 @@
         <button id="loginBtn" class="btn-primary">Iniciar sesión</button>
         <div id="loginLoader" class="loader"></div>
         <a href="#" id="forgotPasswordLink" class="link">¿Olvidaste tu contraseña?</a>
-        <hr style="margin: 15px 0; border: none; border-top: 1px solid #dddfe2;">
-        <a href="#" id="showRegisterLink" class="link">Crear cuenta nueva</a>
-      </div>
-      <div id="registerForm" style="display: none;">
-        <input type="text" id="firstName" placeholder="Nombre">
-        <input type="text" id="lastName" placeholder="Apellido">
-        <input type="email" id="regEmail" placeholder="Correo electrónico">
-        <input type="password" id="regPassword" placeholder="Contraseña">
-        <input type="password" id="confirmPassword" placeholder="Confirmar contraseña">
-        <div id="registerError" class="error"></div>
-        <button id="registerBtn" class="btn-secondary">Crear cuenta</button>
-        <div id="registerLoader" class="loader"></div>
-        <hr style="margin: 15px 0; border: none; border-top: 1px solid #dddfe2;">
-        <a href="#" id="showLoginLink" class="link">Ya tengo una cuenta</a>
       </div>
     </div>
   </div>
@@ -206,30 +192,17 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.15.0/firebase-app.js";
     import { getDatabase, ref, set, push, get, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.15.0/firebase-database.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.15.0/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.15.0/firebase-auth.js";
 
     // Configuración de Firebase
-    // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyDMwNZ7r8Vyx0LicAEWdiitdIhXsncB84g",
-  authDomain: "labsuprl.firebaseapp.com",
-  databaseURL: "https://labsuprl-default-rtdb.firebaseio.com",
-  projectId: "labsuprl",
-  storageBucket: "labsuprl.firebasestorage.app",
-  messagingSenderId: "380634406494",
-  appId: "1:380634406494:web:1e6295708f49606a59decf",
-  measurementId: "G-FVSNW7XL3P"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+    const firebaseConfig = {
+      apiKey: "TU_API_KEY",
+      authDomain: "TU_PROYECTO.firebaseapp.com",
+      databaseURL: "https://TU_PROYECTO-default-rtdb.firebaseio.com",
+      projectId: "TU_PROYECTO",
+      storageBucket: "TU_PROYECTO.appspot.com",
+      messagingSenderId: "TU_SENDER_ID",
+      appId: "TU_APP_ID"
     };
 
     // Inicializar Firebase
@@ -238,7 +211,7 @@ const analytics = getAnalytics(app);
       app = initializeApp(firebaseConfig);
       db = getDatabase(app);
       auth = getAuth();
-      console.log('Firebase inicializado');
+      console.log('Firebase inicializado correctamente');
     } catch (error) {
       console.error('Error inicializando Firebase:', error);
       alert('Error al conectar con el servidor.');
@@ -255,24 +228,13 @@ const analytics = getAnalytics(app);
       authSection: document.getElementById('authSection'),
       labSection: document.getElementById('labSection'),
       loginForm: document.getElementById('loginForm'),
-      registerForm: document.getElementById('registerForm'),
       userName: document.getElementById('userName'),
       email: document.getElementById('email'),
       password: document.getElementById('password'),
-      firstName: document.getElementById('firstName'),
-      lastName: document.getElementById('lastName'),
-      regEmail: document.getElementById('regEmail'),
-      regPassword: document.getElementById('regPassword'),
-      confirmPassword: document.getElementById('confirmPassword'),
       loginBtn: document.getElementById('loginBtn'),
-      registerBtn: document.getElementById('registerBtn'),
-      showRegisterLink: document.getElementById('showRegisterLink'),
-      showLoginLink: document.getElementById('showLoginLink'),
       forgotPasswordLink: document.getElementById('forgotPasswordLink'),
       loginError: document.getElementById('loginError'),
-      registerError: document.getElementById('registerError'),
       loginLoader: document.getElementById('loginLoader'),
-      registerLoader: document.getElementById('registerLoader'),
       estadoBtn: document.getElementById('estadoBtn'),
       estadoTexto: document.getElementById('estadoTexto'),
       ultimoUsuario: document.getElementById('ultimoUsuario'),
@@ -282,12 +244,12 @@ const analytics = getAnalytics(app);
 
     // Verificar elementos del DOM
     for (const [key, value] of Object.entries(elements)) {
-      if (!value) console.error(`Elemento ${key} no encontrado`);
+      if (!value) console.error(`Elemento ${key} no encontrado en el DOM`);
     }
 
     // Funciones de utilidad
     function showError(element, message) {
-      console.log('Error:', message);
+      console.log('Mostrando error:', message);
       element.textContent = message;
       element.style.display = 'block';
     }
@@ -322,80 +284,54 @@ const analytics = getAnalytics(app);
       return true;
     }
 
-    function validateRegisterInputs() {
-      const firstName = elements.firstName.value.trim();
-      const lastName = elements.lastName.value.trim();
-      const email = elements.regEmail.value.trim();
-      const password = elements.regPassword.value;
-      const confirmPassword = elements.confirmPassword.value;
-      if (!firstName) {
-        showError(elements.registerError, 'Ingresa tu nombre.');
-        return false;
+    // Cargar estado del laboratorio
+    async function loadLabState() {
+      console.log('Cargando estado del laboratorio...');
+      try {
+        const estadoSnapshot = await get(estadoRef);
+        const estado = estadoSnapshot.val() || 'DISPONIBLE';
+        elements.estadoTexto.textContent = `El laboratorio está ${estado}`;
+        elements.estadoBtn.textContent = estado === 'DISPONIBLE' ? 'Disponible (Ocupar)' : 'En uso (Liberar)';
+        elements.estadoBtn.style.backgroundColor = estado === 'DISPONIBLE' ? '#42b72a' : '#e74c3c';
+        console.log('Estado cargado:', estado);
+
+        const usuarioSnapshot = await get(usuarioRef);
+        const usuario = usuarioSnapshot.val();
+        elements.ultimoUsuario.textContent = usuario ? `Último cambio por: ${usuario}` : 'Sin cambios';
+        console.log('Usuario cargado:', usuario);
+
+        const historialSnapshot = await get(historialRef);
+        const historial = historialSnapshot.val();
+        if (!historial) {
+          elements.historialContainer.innerHTML = '<p>No hay historial.</p>';
+          console.log('Sin historial');
+          return;
+        }
+        const entradas = Object.values(historial)
+          .reverse()
+          .map(entry => `<li>${entry.fecha} - ${entry.usuario} cambió a ${entry.estado}</li>`);
+        elements.historialContainer.innerHTML = `<ul>${entradas.join('')}</ul>`;
+        console.log('Historial cargado:', entradas);
+      } catch (error) {
+        console.error('Error cargando estado o historial:', error);
+        elements.estadoTexto.textContent = 'Error al cargar el estado';
+        elements.estadoBtn.textContent = 'Error';
+        elements.ultimoUsuario.textContent = 'Error al cargar usuario';
+        elements.historialContainer.innerHTML = '<p>Error al cargar historial.</p>';
       }
-      if (!lastName) {
-        showError(elements.registerError, 'Ingresa tu apellido.');
-        return false;
-      }
-      if (!email.includes('@') || !email.includes('.')) {
-        showError(elements.registerError, 'Ingresa un correo válido.');
-        return false;
-      }
-      if (password.length < 6) {
-        showError(elements.registerError, 'La contraseña debe tener al menos 6 caracteres.');
-        return false;
-      }
-      if (password !== confirmPassword) {
-        showError(elements.registerError, 'Las contraseñas no coinciden.');
-        return false;
-      }
-      return true;
     }
 
-    function loadLabState() {
-      console.log('Cargando estado del laboratorio...');
-      get(estadoRef)
-        .then((snapshot) => {
-          const estado = snapshot.val() || 'DISPONIBLE';
-          elements.estadoTexto.textContent = `El laboratorio está ${estado}`;
-          elements.estadoBtn.textContent = estado === 'DISPONIBLE' ? 'Disponible (Ocupar)' : 'En uso (Liberar)';
-          elements.estadoBtn.style.backgroundColor = estado === 'DISPONIBLE' ? '#42b72a' : '#e74c3c';
-          console.log('Estado:', estado);
-        })
-        .catch((error) => {
-          console.error('Error cargando estado:', error);
-          elements.estadoTexto.textContent = 'Error al cargar el estado';
-          elements.estadoBtn.textContent = 'Error';
-        });
-
-      get(usuarioRef)
-        .then((snapshot) => {
-          const usuario = snapshot.val();
-          elements.ultimoUsuario.textContent = usuario ? `Último cambio por: ${usuario}` : 'Sin cambios';
-          console.log('Usuario:', usuario);
-        })
-        .catch((error) => {
-          console.error('Error cargando usuario:', error);
-          elements.ultimoUsuario.textContent = 'Error al cargar usuario';
-        });
-
-      get(historialRef)
-        .then((snapshot) => {
-          const historial = snapshot.val();
-          if (!historial) {
-            elements.historialContainer.innerHTML = '<p>No hay historial.</p>';
-            console.log('Sin historial');
-            return;
-          }
-          const entradas = Object.values(historial)
-            .reverse()
-            .map(entry => `<li>${entry.fecha} - ${entry.usuario} cambió a ${entry.estado}</li>`);
-          elements.historialContainer.innerHTML = `<ul>${entradas.join('')}</ul>`;
-          console.log('Historial:', entradas);
-        })
-        .catch((error) => {
-          console.error('Error cargando historial:', error);
-          elements.historialContainer.innerHTML = '<p>Error al cargar historial.</p>';
-        });
+    // Verificar autorización del usuario
+    async function isUserAuthorized(user) {
+      try {
+        const userSnapshot = await get(ref(db, `users/${user.uid}`));
+        const userData = userSnapshot.val();
+        console.log('Datos de usuario:', userData);
+        return userData && userData.isAuthorized === true;
+      } catch (error) {
+        console.error('Error verificando autorización:', error);
+        return false;
+      }
     }
 
     // Asignar eventos
@@ -422,74 +358,14 @@ const analytics = getAnalytics(app);
             case 'auth/network-request-failed':
               message = 'Error de red. Verifica tu conexión.';
               break;
+            case 'auth/invalid-credential':
+              message = 'Credenciales inválidas.';
+              break;
           }
           showError(elements.loginError, message);
         } finally {
           hideLoader(elements.loginLoader, elements.loginBtn);
         }
-      });
-    }
-
-    if (elements.registerBtn) {
-      elements.registerBtn.addEventListener('click', async () => {
-        console.log('Clic en Crear cuenta');
-        if (!validateRegisterInputs()) return;
-        showLoader(elements.registerLoader, elements.registerBtn);
-        hideError(elements.registerError);
-        try {
-          const userCredential = await createUserWithEmailAndPassword(auth, elements.regEmail.value, elements.regPassword.value);
-          const user = userCredential.user;
-          await set(ref(db, `users/${user.uid}`), {
-            firstName: elements.firstName.value.trim(),
-            lastName: elements.lastName.value.trim(),
-            email: elements.regEmail.value.trim(),
-            createdAt: new Date().toISOString()
-          });
-          await sendEmailVerification(user);
-          alert('Cuenta creada. Verifica tu correo electrónico.');
-          elements.loginForm.style.display = 'block';
-          elements.registerForm.style.display = 'none';
-          console.log('Registro exitoso');
-        } catch (err) {
-          console.error('Error en registro:', err);
-          let message = 'Ocurrió un error.';
-          switch (err.code) {
-            case 'auth/email-already-in-use':
-              message = 'Este correo ya está registrado.';
-              break;
-            case 'auth/invalid-email':
-              message = 'Correo inválido.';
-              break;
-            case 'auth/network-request-failed':
-              message = 'Error de red. Verifica tu conexión.';
-              break;
-          }
-          showError(elements.registerError, message);
-        } finally {
-          hideLoader(elements.registerLoader, elements.registerBtn);
-        }
-      });
-    }
-
-    if (elements.showRegisterLink) {
-      elements.showRegisterLink.addEventListener('click', (e) => {
-        console.log('Clic en Crear cuenta nueva');
-        e.preventDefault();
-        elements.loginForm.style.display = 'none';
-        elements.registerForm.style.display = 'block';
-        hideError(elements.loginError);
-        hideError(elements.registerError);
-      });
-    }
-
-    if (elements.showLoginLink) {
-      elements.showLoginLink.addEventListener('click', (e) => {
-        console.log('Clic en Ya tengo una cuenta');
-        e.preventDefault();
-        elements.loginForm.style.display = 'block';
-        elements.registerForm.style.display = 'none';
-        hideError(elements.loginError);
-        hideError(elements.registerError);
       });
     }
 
@@ -531,7 +407,7 @@ const analytics = getAnalytics(app);
     }
 
     if (elements.estadoBtn) {
-      elements.estadoBtn.addEventListener('click', () => {
+      elements.estadoBtn.addEventListener('click', async () => {
         console.log('Clic en Cambiar estado');
         const user = auth.currentUser;
         if (!user) {
@@ -539,40 +415,66 @@ const analytics = getAnalytics(app);
           console.log('Usuario no autenticado');
           return;
         }
-        get(estadoRef)
-          .then((snapshot) => {
-            const estadoActual = snapshot.val() || 'DISPONIBLE';
-            const nuevoEstado = estadoActual === 'DISPONIBLE' ? 'EN USO' : 'DISPONIBLE';
-            const fechaHora = new Date().toLocaleString('es-MX');
-            get(ref(db, `users/${user.uid}`))
-              .then((userSnapshot) => {
-                const userData = userSnapshot.val();
-                const fullName = userData ? `${userData.firstName} ${userData.lastName}` : user.email;
-                set(ref(db, 'laboratorio'), {
-                  estado: nuevoEstado,
-                  usuario: fullName
-                })
-                  .then(() => {
-                    console.log('Estado actualizado:', nuevoEstado);
-                    push(ref(db, 'laboratorio/historial'), {
-                      estado: nuevoEstado,
-                      usuario: fullName,
-                      fecha: fechaHora
-                    })
-                      .then(() => console.log('Historial actualizado'))
-                      .catch((error) => console.error('Error actualizando historial:', error));
-                    loadLabState();
-                  })
-                  .catch((error) => {
-                    console.error('Error actualizando estado:', error);
-                    alert('Error al cambiar el estado.');
-                  });
-              })
-              .catch((error) => {
-                console.error('Error cargando datos de usuario:', error);
-                alert('Error al cargar datos de usuario.');
-              });
-          })
-          .catch((error) => {
-            console.error('Error leyendo estado:', error);
-            alert('Error al leer el esta
+        const isAuthorized = await isUserAuthorized(user);
+        if (!isAuthorized) {
+          alert('No tienes permiso para cambiar el estado del laboratorio.');
+          console.log('Usuario no autorizado:', user.email);
+          return;
+        }
+        try {
+          const estadoSnapshot = await get(estadoRef);
+          const estadoActual = estadoSnapshot.val() || 'DISPONIBLE';
+          const nuevoEstado = estadoActual === 'DISPONIBLE' ? 'EN USO' : 'DISPONIBLE';
+          const fechaHora = new Date().toLocaleString('es-MX');
+          const userSnapshot = await get(ref(db, `users/${user.uid}`));
+          const userData = userSnapshot.val();
+          const fullName = userData ? `${userData.firstName} ${userData.lastName}` : user.email;
+          await set(ref(db, 'laboratorio'), {
+            estado: nuevoEstado,
+            usuario: fullName
+          });
+          console.log('Estado actualizado:', nuevoEstado);
+          await push(ref(db, 'laboratorio/historial'), {
+            estado: nuevoEstado,
+            usuario: fullName,
+            fecha: fechaHora
+          });
+          console.log('Historial actualizado');
+          loadLabState();
+        } catch (error) {
+          console.error('Error actualizando estado:', error);
+          alert('Error al cambiar el estado.');
+        }
+      });
+    }
+
+    // Estado de autenticación
+    onAuthStateChanged(auth, async (user) => {
+      console.log('Estado de autenticación:', user ? 'Autenticado' : 'No autenticado');
+      if (user) {
+        try {
+          const userSnapshot = await get(ref(db, `users/${user.uid}`));
+          const userData = userSnapshot.val();
+          elements.userName.textContent = userData ? `${userData.firstName} ${userData.lastName}` : user.email;
+          elements.authSection.classList.remove('visible');
+          elements.labSection.classList.add('visible');
+          await loadLabState();
+          const isAuthorized = await isUserAuthorized(user);
+          elements.estadoBtn.disabled = !isAuthorized;
+          elements.estadoBtn.title = isAuthorized ? '' : 'No tienes permiso para cambiar el estado';
+          console.log('Usuario autorizado:', isAuthorized);
+          console.log('Mostrando sección de laboratorio');
+        } catch (error) {
+          console.error('Error cargando datos de usuario:', error);
+          elements.userName.textContent = user.email;
+        }
+      } else {
+        elements.authSection.classList.add('visible');
+        elements.labSection.classList.remove('visible');
+        elements.userName.textContent = '';
+        console.log('Mostrando sección de autenticación');
+      }
+    });
+  </script>
+</body>
+  </html>
