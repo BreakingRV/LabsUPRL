@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estado del Laboratorio</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Inter', Helvetica, Arial, sans-serif;
+      background: linear-gradient(135deg, #1877f2, #42b72a);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    h1 {
+      color: #fff;
+      font-size: 2.5em;
+      margin-bottom: 20px;
+    }
+    .container {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
+      max-width: 900px;
+      width: 100%;
+    }
+    .intro-text {
+      max-width: 400px;
+      color: #fff;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    }
+    .intro-text h2 {
+      font-size: 1.8em;
+      margin-bottom: 10px;
+    }
+    .card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      width: 100%;
+      max-width: 400px;
+    }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      font-size: 1em;
+      border: 1px solid #dddfe2;
+      border-radius: 6px;
+      outline: none;
+    }
+    input:focus {
+      border-color: #1877f2;
+      box-shadow: 0 0 0 2px rgba(24, 119, 242, 0.2);
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      font-size: 1em;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background-color: #1877f2;
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background-color: #166fe5;
+    }
+    .btn-secondary {
+      background-color: #42b72a;
+      color: #fff;
+    }
+    .btn-secondary:hover {
+      background-color: #36a420;
+    }
+    .btn-logout {
+      background-color: #e7e7e7;
+      color: #333;
+    }
+    .btn-logout:hover {
+      background-color: #d0d0d0;
+    }
+    .link {
+      color: #1877f2;
+      text-decoration: none;
+      font-size: 0.9em;
+      text-align: center;
+      display: block;
+      margin-top: 10px;
+    }
+    .link:hover {
+      text-decoration: underline;
+    }
+    .error {
+      color: #e74c3c;
+      font-size: 0.85em;
+      margin-top: 5px;
+      display: none;
+    }
+    .loader {
+      border: 2px solid #f3f3f3;
+      border-top: 2px solid #1877f2;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+      display: none;
+      margin: 10px auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    #estadoBtn {
+      font-size: 1.1em;
+      margin-top: 15px;
+    }
+    #estadoTexto, #ultimoUsuario {
+      margin-top: 15px;
+      color: #333;
+    }
+    #historialCambios {
+      margin-top: 20px;
+      background: #f5f6f5;
+      padding: 15px;
+      border-radius: 8px;
+    }
+    .section {
+      display: none;
+    }
+    .visible {
+      display: block;
+    }
+    @media (max-width: 600px) {
+      .container {
+        flex-direction: column;
+        gap: 20px;
+      }
+      .intro-text {
+        text-align: center;
+      }
+      .card {
+        padding: 15px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="intro-text">
+      <h2>Estado del Laboratorio</h2>
+      <p>Controla el estado del laboratorio de forma rápida y sencilla. Regístrate o inicia sesión para comenzar.</p>
+    </div>
+    <div id="authSection" class="section visible card">
+      <div id="loginForm">
+        <input type="email" id="email" placeholder="Correo electrónico">
+        <input type="password" id="password" placeholder="Contraseña">
+        <div id="loginError" class="error"></div>
+        <button id="loginBtn" class="btn-primary">Iniciar sesión</button>
+        <div id="loginLoader" class="loader"></div>
+        <a href="#" id="forgotPasswordLink" class="link">¿Olvidaste tu contraseña?</a>
+        <hr style="margin: 15px 0; border: none; border-top: 1px solid #dddfe2;">
+        <a href="#" id="showRegisterLink" class="link">Crear cuenta nueva</a>
+      </div>
+      <div id="registerForm" style="display: none;">
+        <input type="text" id="firstName" placeholder="Nombre">
+        <input type="text" id="lastName" placeholder="Apellido">
+        <input type="email" id="regEmail" placeholder="Correo electrónico">
+        <input type="password" id="regPassword" placeholder="Contraseña">
+        <input type="password" id="confirmPassword" placeholder="Confirmar contraseña">
+        <div id="registerError" class="error"></div>
+        <button id="registerBtn" class="btn-secondary">Crear cuenta</button>
+        <div id="registerLoader" class="loader"></div>
+        <hr style="margin: 15px 0; border: none; border-top: 1px solid #dddfe2;">
+        <a href="#" id="showLoginLink" class="link">Ya tengo una cuenta</a>
+      </div>
+    </div>
+  </div>
+  <div id="labSection" class="section card">
+    <p>Sesión iniciada como: <strong><span id="userName"></span></strong></p>
+    <button id="logoutBtn" class="btn-logout">Cerrar sesión</button>
+    <button id="estadoBtn" class="btn-primary">Cargando...</button>
+    <p id="estadoTexto">Cargando estado...</p>
+    <p id="ultimoUsuario">Cargando usuario...</p>
+    <div id="historialCambios">
+      <h3>Últimos 2 cambios</h3>
+      <p>Cargando historial...</p>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.15.0/firebase-app.js";
+    import { getDatabase, ref, set, push, get, query, limitToLast } from "https://www.gstatic.com/firebasejs/10.15.0/firebase-database.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.15.0/firebase-auth.js";
+
+    // Configuración de Firebase
+    // Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyDMwNZ7r8Vyx0LicAEWdiitdIhXsncB84g",
+  authDomain: "labsuprl.firebaseapp.com",
+  databaseURL: "https://labsuprl-default-rtdb.firebaseio.com",
+  projectId: "labsuprl",
+  storageBucket: "labsuprl.firebasestorage.app",
+  messagingSenderId: "380634406494",
+  appId: "1:380634406494:web:1e6295708f49606a59decf",
+  measurementId: "G-FVSNW7XL3P"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+    };
+
+    // Inicializar Firebase
+    let app, db, auth;
+    try {
+      app = initializeApp(firebaseConfig);
+      db = getDatabase(app);
+      auth = getAuth();
+      console.log('Firebase inicializado');
+    } catch (error) {
+      console.error('Error inicializando Firebase:', error);
+      alert('Error al conectar con el servidor.');
+    }
+
+    // Referencias a la base de datos
+    const estadoRef = ref(db, 'laboratorio/estado');
+    const usuarioRef = ref(db, 'laboratorio/usuario');
+    const historialRef = query(ref(db, 'laboratorio/historial'), limitToLast(2));
+    const usersRef = ref(db, 'users');
+
+    // Elementos del DOM
+    const elements = {
+      authSection: document.getElementById('authSection'),
+      labSection: document.getElementById('labSection'),
+      loginForm: document.getElementById('loginForm'),
+      registerForm: document.getElementById('registerForm'),
+      userName: document.getElementById('userName'),
+      email: document.getElementById('email'),
+      password: document.getElementById('password'),
+      firstName: document.getElementById('firstName'),
+      lastName: document.getElementById('lastName'),
+      regEmail: document.getElementById('regEmail'),
+      regPassword: document.getElementById('regPassword'),
+      confirmPassword: document.getElementById('confirmPassword'),
+      loginBtn: document.getElementById('loginBtn'),
+      registerBtn: document.getElementById('registerBtn'),
+      showRegisterLink: document.getElementById('showRegisterLink'),
+      showLoginLink: document.getElementById('showLoginLink'),
+      forgotPasswordLink: document.getElementById('forgotPasswordLink'),
+      loginError: document.getElementById('loginError'),
+      registerError: document.getElementById('registerError'),
+      loginLoader: document.getElementById('loginLoader'),
+      registerLoader: document.getElementById('registerLoader'),
+      estadoBtn: document.getElementById('estadoBtn'),
+      estadoTexto: document.getElementById('estadoTexto'),
+      ultimoUsuario: document.getElementById('ultimoUsuario'),
+      historialContainer: document.getElementById('historialCambios'),
+      logoutBtn: document.getElementById('logoutBtn')
+    };
+
+    // Verificar elementos del DOM
+    for (const [key, value] of Object.entries(elements)) {
+      if (!value) console.error(`Elemento ${key} no encontrado`);
+    }
+
+    // Funciones de utilidad
+    function showError(element, message) {
+      console.log('Error:', message);
+      element.textContent = message;
+      element.style.display = 'block';
+    }
+
+    function hideError(element) {
+      element.style.display = 'none';
+    }
+
+    function showLoader(loader, button) {
+      console.log(`Mostrando loader para ${button.id}`);
+      loader.style.display = 'block';
+      button.disabled = true;
+    }
+
+    function hideLoader(loader, button) {
+      console.log(`Ocultando loader para ${button.id}`);
+      loader.style.display = 'none';
+      button.disabled = false;
+    }
+
+    function validateLoginInputs() {
+      const email = elements.email.value.trim();
+      const password = elements.password.value;
+      if (!email) {
+        showError(elements.loginError, 'Ingresa un correo electrónico.');
+        return false;
+      }
+      if (!password) {
+        showError(elements.loginError, 'Ingresa una contraseña.');
+        return false;
+      }
+      return true;
+    }
+
+    function validateRegisterInputs() {
+      const firstName = elements.firstName.value.trim();
+      const lastName = elements.lastName.value.trim();
+      const email = elements.regEmail.value.trim();
+      const password = elements.regPassword.value;
+      const confirmPassword = elements.confirmPassword.value;
+      if (!firstName) {
+        showError(elements.registerError, 'Ingresa tu nombre.');
+        return false;
+      }
+      if (!lastName) {
+        showError(elements.registerError, 'Ingresa tu apellido.');
+        return false;
+      }
+      if (!email.includes('@') || !email.includes('.')) {
+        showError(elements.registerError, 'Ingresa un correo válido.');
+        return false;
+      }
+      if (password.length < 6) {
+        showError(elements.registerError, 'La contraseña debe tener al menos 6 caracteres.');
+        return false;
+      }
+      if (password !== confirmPassword) {
+        showError(elements.registerError, 'Las contraseñas no coinciden.');
+        return false;
+      }
+      return true;
+    }
+
+    function loadLabState() {
+      console.log('Cargando estado del laboratorio...');
+      get(estadoRef)
+        .then((snapshot) => {
+          const estado = snapshot.val() || 'DISPONIBLE';
+          elements.estadoTexto.textContent = `El laboratorio está ${estado}`;
+          elements.estadoBtn.textContent = estado === 'DISPONIBLE' ? 'Disponible (Ocupar)' : 'En uso (Liberar)';
+          elements.estadoBtn.style.backgroundColor = estado === 'DISPONIBLE' ? '#42b72a' : '#e74c3c';
+          console.log('Estado:', estado);
+        })
+        .catch((error) => {
+          console.error('Error cargando estado:', error);
+          elements.estadoTexto.textContent = 'Error al cargar el estado';
+          elements.estadoBtn.textContent = 'Error';
+        });
+
+      get(usuarioRef)
+        .then((snapshot) => {
+          const usuario = snapshot.val();
+          elements.ultimoUsuario.textContent = usuario ? `Último cambio por: ${usuario}` : 'Sin cambios';
+          console.log('Usuario:', usuario);
+        })
+        .catch((error) => {
+          console.error('Error cargando usuario:', error);
+          elements.ultimoUsuario.textContent = 'Error al cargar usuario';
+        });
+
+      get(historialRef)
+        .then((snapshot) => {
+          const historial = snapshot.val();
+          if (!historial) {
+            elements.historialContainer.innerHTML = '<p>No hay historial.</p>';
+            console.log('Sin historial');
+            return;
+          }
+          const entradas = Object.values(historial)
+            .reverse()
+            .map(entry => `<li>${entry.fecha} - ${entry.usuario} cambió a ${entry.estado}</li>`);
+          elements.historialContainer.innerHTML = `<ul>${entradas.join('')}</ul>`;
+          console.log('Historial:', entradas);
+        })
+        .catch((error) => {
+          console.error('Error cargando historial:', error);
+          elements.historialContainer.innerHTML = '<p>Error al cargar historial.</p>';
+        });
+    }
+
+    // Asignar eventos
+    if (elements.loginBtn) {
+      elements.loginBtn.addEventListener('click', async () => {
+        console.log('Clic en Iniciar sesión');
+        if (!validateLoginInputs()) return;
+        showLoader(elements.loginLoader, elements.loginBtn);
+        hideError(elements.loginError);
+        try {
+          await signInWithEmailAndPassword(auth, elements.email.value, elements.password.value);
+          console.log('Inicio de sesión exitoso');
+        } catch (err) {
+          console.error('Error en inicio de sesión:', err);
+          let message = 'Ocurrió un error.';
+          switch (err.code) {
+            case 'auth/user-not-found':
+            case 'auth/wrong-password':
+              message = 'Correo o contraseña incorrectos.';
+              break;
+            case 'auth/invalid-email':
+              message = 'Correo inválido.';
+              break;
+            case 'auth/network-request-failed':
+              message = 'Error de red. Verifica tu conexión.';
+              break;
+          }
+          showError(elements.loginError, message);
+        } finally {
+          hideLoader(elements.loginLoader, elements.loginBtn);
+        }
+      });
+    }
+
+    if (elements.registerBtn) {
+      elements.registerBtn.addEventListener('click', async () => {
+        console.log('Clic en Crear cuenta');
+        if (!validateRegisterInputs()) return;
+        showLoader(elements.registerLoader, elements.registerBtn);
+        hideError(elements.registerError);
+        try {
+          const userCredential = await createUserWithEmailAndPassword(auth, elements.regEmail.value, elements.regPassword.value);
+          const user = userCredential.user;
+          await set(ref(db, `users/${user.uid}`), {
+            firstName: elements.firstName.value.trim(),
+            lastName: elements.lastName.value.trim(),
+            email: elements.regEmail.value.trim(),
+            createdAt: new Date().toISOString()
+          });
+          await sendEmailVerification(user);
+          alert('Cuenta creada. Verifica tu correo electrónico.');
+          elements.loginForm.style.display = 'block';
+          elements.registerForm.style.display = 'none';
+          console.log('Registro exitoso');
+        } catch (err) {
+          console.error('Error en registro:', err);
+          let message = 'Ocurrió un error.';
+          switch (err.code) {
+            case 'auth/email-already-in-use':
+              message = 'Este correo ya está registrado.';
+              break;
+            case 'auth/invalid-email':
+              message = 'Correo inválido.';
+              break;
+            case 'auth/network-request-failed':
+              message = 'Error de red. Verifica tu conexión.';
+              break;
+          }
+          showError(elements.registerError, message);
+        } finally {
+          hideLoader(elements.registerLoader, elements.registerBtn);
+        }
+      });
+    }
+
+    if (elements.showRegisterLink) {
+      elements.showRegisterLink.addEventListener('click', (e) => {
+        console.log('Clic en Crear cuenta nueva');
+        e.preventDefault();
+        elements.loginForm.style.display = 'none';
+        elements.registerForm.style.display = 'block';
+        hideError(elements.loginError);
+        hideError(elements.registerError);
+      });
+    }
+
+    if (elements.showLoginLink) {
+      elements.showLoginLink.addEventListener('click', (e) => {
+        console.log('Clic en Ya tengo una cuenta');
+        e.preventDefault();
+        elements.loginForm.style.display = 'block';
+        elements.registerForm.style.display = 'none';
+        hideError(elements.loginError);
+        hideError(elements.registerError);
+      });
+    }
+
+    if (elements.forgotPasswordLink) {
+      elements.forgotPasswordLink.addEventListener('click', (e) => {
+        console.log('Clic en Olvidé mi contraseña');
+        e.preventDefault();
+        const email = elements.email.value.trim();
+        if (!email) {
+          showError(elements.loginError, 'Ingresa tu correo para recuperar la contraseña.');
+          return;
+        }
+        showLoader(elements.loginLoader, elements.loginBtn);
+        sendPasswordResetEmail(auth, email)
+          .then(() => {
+            alert('Correo de recuperación enviado.');
+            console.log('Correo de recuperación enviado');
+          })
+          .catch((err) => {
+            console.error('Error enviando correo de recuperación:', err);
+            showError(elements.loginError, 'Error al enviar el correo de recuperación.');
+          })
+          .finally(() => hideLoader(elements.loginLoader, elements.loginBtn));
+      });
+    }
+
+    if (elements.logoutBtn) {
+      elements.logoutBtn.addEventListener('click', () => {
+        console.log('Clic en Cerrar sesión');
+        signOut(auth)
+          .then(() => {
+            console.log('Cierre de sesión exitoso');
+          })
+          .catch((err) => {
+            console.error('Error al cerrar sesión:', err);
+            alert('Error al cerrar sesión.');
+          });
+      });
+    }
+
+    if (elements.estadoBtn) {
+      elements.estadoBtn.addEventListener('click', () => {
+        console.log('Clic en Cambiar estado');
+        const user = auth.currentUser;
+        if (!user) {
+          alert('Debes iniciar sesión para cambiar el estado.');
+          console.log('Usuario no autenticado');
+          return;
+        }
+        get(estadoRef)
+          .then((snapshot) => {
+            const estadoActual = snapshot.val() || 'DISPONIBLE';
+            const nuevoEstado = estadoActual === 'DISPONIBLE' ? 'EN USO' : 'DISPONIBLE';
+            const fechaHora = new Date().toLocaleString('es-MX');
+            get(ref(db, `users/${user.uid}`))
+              .then((userSnapshot) => {
+                const userData = userSnapshot.val();
+                const fullName = userData ? `${userData.firstName} ${userData.lastName}` : user.email;
+                set(ref(db, 'laboratorio'), {
+                  estado: nuevoEstado,
+                  usuario: fullName
+                })
+                  .then(() => {
+                    console.log('Estado actualizado:', nuevoEstado);
+                    push(ref(db, 'laboratorio/historial'), {
+                      estado: nuevoEstado,
+                      usuario: fullName,
+                      fecha: fechaHora
+                    })
+                      .then(() => console.log('Historial actualizado'))
+                      .catch((error) => console.error('Error actualizando historial:', error));
+                    loadLabState();
+                  })
+                  .catch((error) => {
+                    console.error('Error actualizando estado:', error);
+                    alert('Error al cambiar el estado.');
+                  });
+              })
+              .catch((error) => {
+                console.error('Error cargando datos de usuario:', error);
+                alert('Error al cargar datos de usuario.');
+              });
+          })
+          .catch((error) => {
+            console.error('Error leyendo estado:', error);
+            alert('Error al leer el esta
