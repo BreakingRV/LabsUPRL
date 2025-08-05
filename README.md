@@ -1,6 +1,6 @@
 # Estado del Laboratorio
 
-Aplicación web para controlar el estado de un laboratorio (DISPONIBLE/EN USO), con registro, inicio de sesión, y historial de cambios. Desplegada en GitHub Pages con Firebase.
+Aplicación web para controlar el estado de un laboratorio (DISPONIBLE/EN USO), con inicio de sesión y historial de cambios. Solo usuarios autorizados manualmente en Firebase pueden cambiar el estado. Desplegada en GitHub Pages con Firebase.
 
 ## Configuración
 
@@ -14,7 +14,7 @@ Aplicación web para controlar el estado de un laboratorio (DISPONIBLE/EN USO), 
        "rules": {
          "laboratorio": {
            ".read": "auth != null",
-           ".write": "auth != null"
+           ".write": "auth != null && data.child('users').child(auth.uid).child('isAuthorized').val() === true"
          },
          "users": {
            "$uid": {
@@ -26,12 +26,26 @@ Aplicación web para controlar el estado de un laboratorio (DISPONIBLE/EN USO), 
      }
      ```
 
-2. **Desplegar en GitHub Pages**:
+2. **Añadir usuarios autorizados**:
+   - En Firebase Console > **Authentication**, añade usuarios manualmente (correo y contraseña).
+   - En **Realtime Database**, agrega el campo `isAuthorized: true` para usuarios permitidos:
+     ```json
+     users/UID_DEL_USUARIO
+       {
+         "firstName": "Nombre",
+         "lastName": "Apellido",
+         "email": "correo@ejemplo.com",
+         "isAuthorized": true,
+         "createdAt": "2025-08-04T22:00:00Z"
+       }
+     ```
+
+3. **Desplegar en GitHub Pages**:
    - Sube el proyecto a un repositorio en GitHub.
    - En **Settings > Pages**, selecciona la rama `main` y la carpeta `/ (root)`.
    - Accede al sitio en `https://tu-usuario.github.io/lab-status-app`.
 
-3. **Dominio personalizado (opcional)**:
+4. **Dominio personalizado (opcional)**:
    - Usa un dominio gratuito por un año con Hostinger o GitHub Student Developer Pack.
    - Configura el dominio en **Settings > Pages > Custom domain**.
 
@@ -41,3 +55,4 @@ Aplicación web para controlar el estado de un laboratorio (DISPONIBLE/EN USO), 
   - Credenciales de Firebase en `firebaseConfig`.
   - Conexión a internet (errores como `auth/network-request-failed`).
   - Reglas de Firebase.
+  - Si el usuario tiene `isAuthorized: true` en la base de datos.
